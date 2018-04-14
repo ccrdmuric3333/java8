@@ -5,10 +5,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class UseLambda {
     private static final Logger log = LogManager.getLogger(UseLambda.class);
@@ -22,6 +25,7 @@ public class UseLambda {
     private void useExisting(){
         useRunnable();
         useComparator();
+        usePredicate();
     }
 
     private void useRunnable(){
@@ -53,11 +57,8 @@ public class UseLambda {
     }
 
     private void useComparator(){
-        int listSize = 100;
-        List<Person> people = new ArrayList<>();
-        for (int ii=0; ii<listSize; ii++){
-            people.add(new Person());
-        }
+        List<Person> people = getPeople(100);
+
         printPeople("Unsorted:", people);
         people.sort((a, b) -> a.getAge() -  b.getAge());
         printPeople("Sorted by age:", people);
@@ -69,9 +70,30 @@ public class UseLambda {
         printPeople("Sorted by gender:", people);
     }
 
-    private void printPeople (String prefix, List<Person> list){
+    private void usePredicate(){
+        List<Person> people = getPeople(100);
+
+        Collection<Person> streamed = people.stream()
+                .filter(a -> a.getGender() == Person.Gender.Female)
+                .filter(a -> a.getAge() > 21)
+                .filter(a -> a.getAge() < 35)
+                .sorted((a, b) -> a.getLastName().toString().compareTo(b.getLastName()))
+                .collect(Collectors.toSet());
+
+        printPeople("Young females by Last name:", streamed);
+    }
+
+    private List<Person> getPeople(int number){
+        List<Person> people = new ArrayList<>();
+        for (int ii=0; ii<number; ii++){
+            people.add(new Person());
+        }
+        return people;
+    }
+
+    private void printPeople (String prefix, Collection<Person> people){
         StringBuilder buf = new StringBuilder();
-        for(Person pp : list){
+        for(Person pp : people){
             buf.append("\n\t" + pp);
         }
         log.info(prefix + buf.toString());
