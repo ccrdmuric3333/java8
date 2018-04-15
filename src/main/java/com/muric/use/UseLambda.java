@@ -72,14 +72,16 @@ public class UseLambda {
 
     private void usePredicate(){
         List<Person> people = getPeople(100);
+        Predicate<Person> female = a -> a.getGender() == Person.Gender.Female;
+        Predicate<Person> mature = a -> a.getAge() > 20;
+        Predicate<Person> stillYoung = a -> a.getAge() < 40;
 
         Collection<Person> streamed = people.stream()
-                .filter(a -> a.getGender() == Person.Gender.Female)
-                .filter(a -> a.getAge() > 21)
-                .filter(a -> a.getAge() < 35)
-                .sorted((a, b) -> a.getLastName().toString().compareTo(b.getLastName()))
-                .collect(Collectors.toSet());
+                .filter(female.and(mature).and(stillYoung))
+                .sorted(Comparator.comparing(Person::getLastName))
+                .collect(Collectors.toList());
 
+        printPeople("All by age", people.stream().sorted(Comparator.comparing(Person::getAge)).collect(Collectors.toList()));
         printPeople("Young females by Last name:", streamed);
     }
 
