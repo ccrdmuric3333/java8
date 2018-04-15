@@ -6,8 +6,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -23,9 +25,10 @@ public class UseLambda {
     }
 
     private void useExisting(){
-        useRunnable();
-        useComparator();
-        usePredicate();
+//        useRunnable();
+//        useComparator();
+//        usePredicate();
+        useGroups();
     }
 
     private void useRunnable(){
@@ -83,6 +86,20 @@ public class UseLambda {
 
         printPeople("All by age", people.stream().sorted(Comparator.comparing(Person::getAge)).collect(Collectors.toList()));
         printPeople("Young females by Last name:", streamed);
+    }
+
+    private void useGroups(){
+        List<Person> people = getPeople(100);
+
+        Map<String, List<Person>> byLastName = people.stream()
+                .collect(Collectors.groupingBy(Person::getLastName));
+
+        for(String name : byLastName.keySet().stream().sorted().collect(Collectors.toList())){
+            printPeople("With last name " + name + " (" + byLastName.get(name).size() + "):",
+                    byLastName.get(name).stream()
+            .sorted(Comparator.comparing(Person::getFirstName))
+            .collect(Collectors.toList()));
+        }
     }
 
     private List<Person> getPeople(int number){
